@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Header from '../components/Header';
 import Loading from '../components/Loading';
+import Home from '../pages/Home';
 import NotFound from '../pages/NotFound';
 
 const Register = lazy(() => import('../pages/Register'));
@@ -14,7 +15,11 @@ const App: React.FC = () => {
       <Routes>
         <Route
           path='/'
-          element={<h1>Home</h1>}
+          element={
+            <Suspense fallback={<Loading />}>
+              <Home />
+            </Suspense>
+          }
         />
         <Route
           path='/login'

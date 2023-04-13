@@ -1,5 +1,38 @@
-from django.shortcuts import render
-from django.http import HttpResponse
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
-def index(request):
-    return HttpResponse("Hello, world!")
+from .serializers import UserProfileSerializer, PostSerializer, CommentSerializer
+
+from .models import Post, PostComment
+
+from rest_framework import status
+
+from rest_framework.generics import RetrieveAPIView, ListAPIView
+
+from rest_framework.pagination import PageNumberPagination
+
+class getUser(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserProfileSerializer
+
+    def get_user(self):
+        return self.request.user
+
+    def retrieve(self, request):
+        user = self.get_user()
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
+
+class postList(ListAPIView):
+    queryset = Post.objects.all().order_by('-date')
+    serializer_class = PostSerializer
+    pagination_class = PageNumberPagination
+
+class commentList(ListAPIView):
+    serializer_class = CommentSerializer
+    pagination_class = PageNumberPagination
+
+    def get_queryset(self):
+        post = Post.objects.get(pk=self.kwargs.get('pk'))
+        comments = PostComment.objects.filter(post=post).order_by('-date')
+        return comments

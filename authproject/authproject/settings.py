@@ -118,7 +118,7 @@ AUTH_USER_MODEL = 'backend.CustomUser'
 
 
 REST_AUTH_SERIALIZERS = {
-    'USER_DETAILS_SERIALIZER': 'users.serializers.UserProfileSerializer'
+    'USER_DETAILS_SERIALIZER': 'users.serializers.UserProfileSerializer',
 }
 
 
@@ -139,6 +139,14 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+MEDIA_URL = '/images/'
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'static'
+]
+
+MEDIA_ROOT = 'static/images'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -152,6 +160,8 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
 }
 
 AUTHENTICATION_BACKENDS = (
@@ -165,10 +175,13 @@ CORS_ORIGIN_WHITELIST = (
     "http://localhost:5173"
 )
 
-CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
+CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "http://localhost:5173"]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 SITE_ID = 1
 
+REST_USE_JWT = True
 
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_USERNAME_REQUIRED = False

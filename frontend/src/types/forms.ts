@@ -3,3 +3,14 @@ export interface FormErrors {
     password1: string | undefined,
     password2: string | undefined
 }
+
+export interface LoginInputTypes {
+    email: string,
+    password: string
+}
+
+export interface RegisterInputTypes {
+    email: string,
+    password1: string,
+    password2: string
+}
