@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const getPosts: () => Promise<object> = async () => {
+export const getPosts: (next?: string | null) => Promise<object> = async (next) => {
 
     try {
         const config = {
@@ -10,7 +10,7 @@ export const getPosts: () => Promise<object> = async () => {
         }
 
         const {data} = await axios.get(
-            'http://127.0.0.1:8000/api/posts/',
+            `${next ? next : 'http://127.0.0.1:8000/api/posts/'}`,
             config
         )
 

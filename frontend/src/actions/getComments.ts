@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const getComments: (postId: number) => Promise<object> = async (postId) => {
+export const getComments: (postId: number | undefined, next?: string | null) => Promise<object> = async (postId, next) => {
     try {
         const config = {
             headers: {
@@ -9,7 +9,7 @@ export const getComments: (postId: number) => Promise<object> = async (postId) =
         }
 
         const { data } = await axios.get(
-            `http://127.0.0.1:8000/api/comments/${postId}`,
+            `${next ? next : `http://127.0.0.1:8000/api/comments/${postId}`}`,
             config
         )
 
