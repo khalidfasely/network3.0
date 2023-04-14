@@ -5,6 +5,7 @@ import { Comment } from '../types/post';
 import { CommentsContext } from './Comments';
 import moment from 'moment';
 import { getComments } from '../actions/getComments';
+import { CommentDataTypes } from '../types/comment';
 
 interface Props {
     postId: number | undefined
@@ -12,26 +13,25 @@ interface Props {
 
 const CommentList: React.FC<Props> = ({ postId }) => {
 
-    const { comments, setComments, nextComments, setNextComments } = useContext(CommentsContext);
+    const { commentsData, setCommentsData } = useContext(CommentsContext);
 
     const handleLoadMoreComments = () => {
-        getComments(postId, nextComments)
+        getComments(postId, commentsData.next)
         .then((res: any) => {
             if (res[1]) {
                 //handle errors
                 return
             }
 
-            setNextComments(res[0].next);
-            setComments((prev: Comment[]) => [...prev, ...res[0].results]);
+            setCommentsData((prev: CommentDataTypes) => ({...prev, next: res[0].next, results: [...prev.results, ...res[0].results]}));
         })
     }
 
     return (
             <>
                 {
-                    comments.length !== 0 ?
-                    comments.map((comment: Comment, idx) => (
+                    commentsData.results.length !== 0 ?
+                    commentsData.results.map((comment: Comment, idx) => (
                         <div key={idx} className='my-3 flex gap-2'>
                             <div>
                                 <img
@@ -59,7 +59,7 @@ const CommentList: React.FC<Props> = ({ postId }) => {
                     )) : null
                 }
                 {
-                    nextComments ?
+                    commentsData.next ?
                     <div className='flex justify-end w-[90%] m-auto'>
                         <button
                             onClick={handleLoadMoreComments}

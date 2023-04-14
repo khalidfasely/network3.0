@@ -16,5 +16,10 @@ export interface RegisterInputTypes {
 }
 
 export interface PostInputTypes {
+    content: string,
+    images: File[]
+}
+
+export interface CommentInputTypes {
     content: string
 }

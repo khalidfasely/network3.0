@@ -9,11 +9,12 @@ from rest_framework import status
 
 from rest_framework.views import APIView
 
-from rest_framework.generics import RetrieveAPIView, ListAPIView
+from rest_framework.generics import RetrieveAPIView, ListAPIView, GenericAPIView
+from rest_framework.mixins import CreateModelMixin
 
 from rest_framework.pagination import PageNumberPagination
 
-class getUser(RetrieveAPIView):
+class GetCurrentUser(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserProfileSerializer
 
@@ -25,12 +26,12 @@ class getUser(RetrieveAPIView):
         serializer = self.get_serializer(user)
         return Response(serializer.data)
 
-class postList(ListAPIView):
+class PostList(ListAPIView):
     queryset = Post.objects.all().order_by('-date')
     serializer_class = PostSerializer
     pagination_class = PageNumberPagination
 
-class commentList(ListAPIView):
+class CommentList(ListAPIView):
     serializer_class = CommentSerializer
     pagination_class = PageNumberPagination
 
@@ -39,11 +40,23 @@ class commentList(ListAPIView):
         comments = PostComment.objects.filter(post=post).order_by('-date')
         return comments
 
-class postItem(APIView):
-    def post(self, request):
-        serializer = PostSerializer(data=request.data)
-        if serializer.is_valid():
-            #https://ilovedjango.com/django/rest-api-framework/tips/save-foreign-key-using-django-rest-framework-create-method/
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class PostItemViewSet(GenericAPIView, CreateModelMixin):
+    serializer_class = PostSerializer
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        images = self.request.FILES.getlist('images')
+        serializer.save(user=self.request.user)
+
+class CommentItemViewSet(GenericAPIView, CreateModelMixin):#ViewSet
+    serializer_class = CommentSerializer
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user, post=Post.objects.get(pk=self.request.data['postId']))
+
+#https://ilovedjango.com/django/rest-api-framework/tips/save-foreign-key-using-django-rest-framework-create-method/
+
+#upload images to db first, then get their ids, then when we add post we send the images ids with it and we then when we create the post we loop for the images and add the post id to each image which their id was returned at first in create_perform

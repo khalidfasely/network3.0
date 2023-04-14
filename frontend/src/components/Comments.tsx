@@ -1,22 +1,23 @@
 import React, { createContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { getComments } from '../actions/getComments';
-import { Comment } from '../types/post';
+import { CommentDataTypes } from '../types/comment';
 import CommentForm from './CommentForm';
 import CommentList from './CommentList';
 
 interface CommentsContextType {
-    comments: Comment[],
-    setComments: (value: Comment[] | ((prevVar: Comment[]) => Comment[])) => void,
-    nextComments: string | null,
-    setNextComments: (value: string | null | ((prevVar: string | null) => string | null)) => void,
+    commentsData: CommentDataTypes,
+    setCommentsData: (value: CommentDataTypes | ((prevVar: CommentDataTypes) => CommentDataTypes)) => void,
 }
 
 export const CommentsContext = createContext<CommentsContextType>({
-    comments: [],
-    setComments: () => {},
-    nextComments: null,
-    setNextComments: () => {},
+    commentsData: {
+        count: "0",
+        next: null,
+        previous: null,
+        results: []
+    },
+    setCommentsData: () => {},
 })
 
 interface Props {
@@ -24,8 +25,12 @@ interface Props {
 }
 
 const Comments: React.FC<Props> = ({ postId }) => {
-    const [comments, setComments] = useState<Comment[]>([]);
-    const [nextComments, setNextComments] = useState<string | null>(null);
+    const [commentsData, setCommentsData] = useState<CommentDataTypes>({
+        count: "0",
+        next: null,
+        previous: null,
+        results: []
+    });
 
     const { email } = useSelector((state: any) => state.auth);
 
@@ -37,17 +42,16 @@ const Comments: React.FC<Props> = ({ postId }) => {
                 return
             }
 
-            setComments(res[0].results);
-            setNextComments(res[0].next);
+            setCommentsData(res[0]);
         });
     }, [postId])
 
     return (
         <div className='w-[95%] m-auto mt-4'>
-            <CommentsContext.Provider value={{ comments, setComments, nextComments, setNextComments }}>
+            <CommentsContext.Provider value={{ commentsData, setCommentsData }}>
                 {
                     email ?
-                    <CommentForm /> :
+                    <CommentForm postId={postId} /> :
                     null
                 }
                 <CommentList postId={postId} />
