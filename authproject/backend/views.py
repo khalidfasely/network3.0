@@ -7,6 +7,8 @@ from .models import Post, PostComment
 
 from rest_framework import status
 
+from rest_framework.views import APIView
+
 from rest_framework.generics import RetrieveAPIView, ListAPIView
 
 from rest_framework.pagination import PageNumberPagination
@@ -36,3 +38,12 @@ class commentList(ListAPIView):
         post = Post.objects.get(pk=self.kwargs.get('pk'))
         comments = PostComment.objects.filter(post=post).order_by('-date')
         return comments
+
+class postItem(APIView):
+    def post(self, request):
+        serializer = PostSerializer(data=request.data)
+        if serializer.is_valid():
+            #https://ilovedjango.com/django/rest-api-framework/tips/save-foreign-key-using-django-rest-framework-create-method/
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

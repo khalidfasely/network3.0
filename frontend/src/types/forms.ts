@@ -14,3 +14,7 @@ export interface RegisterInputTypes {
     password1: string,
     password2: string
 }
+
+export interface PostInputTypes {
+    content: string
+}
