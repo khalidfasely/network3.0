@@ -14,7 +14,7 @@ class Post(models.Model):
         return f"by {self.user.username}"
 
 class PostImage(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True, related_name='images')
     image = models.ImageField()
 
     def __str__(self):

@@ -1,7 +1,5 @@
 import React from 'react';
 import { Image } from '../types/post';
-import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
-import { Carousel } from 'react-responsive-carousel';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
@@ -16,8 +14,6 @@ const ImageSlider: React.FC<Props> = ({ images }) => {
             <Swiper
                 spaceBetween={50}
                 slidesPerView={1}
-                //onSlideChange={() => console.log('slide change')}
-                //onSwiper={(swiper) => console.log(swiper)}
                 navigation
                 pagination={{ clickable: true }}
                 scrollbar={{ draggable: true }}
@@ -34,15 +30,6 @@ const ImageSlider: React.FC<Props> = ({ images }) => {
                     ))
                 }
             </Swiper>
-            {/*<Carousel>
-                {
-                    images.map((image: Image, idx) => (
-                        <div key={idx}>
-                            <img src={'http://127.0.0.1:8000' + image.image} />
-                        </div>
-                    ))
-                }
-            </Carousel>*/}
         </div>
     )
 }

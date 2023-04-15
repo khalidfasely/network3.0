@@ -2,8 +2,8 @@ import React, { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { getUser } from '../actions/getUser';
-import { loginApi } from '../actions/login';
+import { getUser } from '../actions/user';
+import { loginApi } from '../actions/user';
 import { login } from '../reducers/auth';
 import { LoginInputTypes } from '../types/forms';
 
@@ -18,30 +18,31 @@ const Login: React.FC = () => {
     const onSubmit = (data: any) => {
         loginApi(data)
         .then((res: any) => {
-            if (res[1]) {
-                //handle server errors
-
-                if (res[1].response.data.non_field_errors) {
-                    setError('root', {
-                        type: 'server',
-                        message: res[1].response.data.non_field_errors[0],
-                    })
-                } else {
-                    const entry: any = Object.entries(res[1].response.data)[0];
-                    setError(entry[0], {
-                        type: 'server',
-                        message: entry[1][0]
-                    })
-                }
-
-                return
-            }
 
             // get user after login successfully
             getUser()
-            .then((res: any) => res[1] === null ? dispatch(login(res[0])) : null)
+            .then((res: any) => {
+                dispatch(login(res.data));
+            })
+            .catch((er: any) => {
+                //handle errors
+            })
 
             navigate('/');
+        })
+        .catch((er: any) => {
+            if (er.response.data.non_field_errors) {
+                setError('root', {
+                    type: 'server',
+                    message: er.response.data.non_field_errors[0],
+                })
+            } else {
+                const entry: any = Object.entries(er.response.data)[0];
+                setError(entry[0], {
+                    type: 'server',
+                    message: entry[1][0]
+                })
+            }
         })
     };
 

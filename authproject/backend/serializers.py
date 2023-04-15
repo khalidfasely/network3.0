@@ -11,7 +11,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.Serializer):
     user = serializers.SerializerMethodField(read_only=True)
     date = serializers.DateTimeField(required=False)
-    """post = serializers.SerializerMethodField(read_only=True)"""
 
     id = serializers.IntegerField(read_only=True)
     content = serializers.CharField(required=True, max_length=5000)
@@ -28,18 +27,17 @@ class CommentSerializer(serializers.Serializer):
         serializer = UserProfileSerializer(user, many=False)
         return serializer.data
 
-    """ def get_post(self, obj):
-        print('~~~~~~~~~~', obj)
-        post = Post.objects.get(pk=obj.post)
-        serializer = PostSerializer(post, many=False)
-        return serializer.data"""
-
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = PostImage
         fields = '__all__'
 
-class PostSerializer(serializers.Serializer):
+class ImageSerializerIDs(serializers.ModelSerializer):
+    class Meta:
+        model = PostImage
+        fields = ('id',)
+
+class PostSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(read_only=True)
     comments = serializers.SerializerMethodField(read_only=True)
     images = serializers.SerializerMethodField(read_only=True)
@@ -52,9 +50,6 @@ class PostSerializer(serializers.Serializer):
         model = Post
         fields = '__all__'
 
-    def create(self, validated_data):
-        return Post.objects.create(**validated_data)
-
     def get_user(self, obj):
         user = obj.user
         serializer = UserProfileSerializer(user, many=False)
@@ -63,9 +58,12 @@ class PostSerializer(serializers.Serializer):
     def get_comments(self, obj):
         comments = obj.comments.all()
         serializer = CommentSerializer(comments, many=True)
-        return serializer.data
+        return comments.count()
 
     def get_images(self, obj):
         images = obj.images.all()
+        
+        print("jjjjjjjjjjjjjjjjjj")
+        print(PostImage.objects.filter(post_id=obj.id))
         serializer = ImageSerializer(images, many=True)
         return serializer.data

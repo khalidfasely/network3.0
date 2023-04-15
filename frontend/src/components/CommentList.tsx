@@ -1,10 +1,9 @@
 import React, { useContext } from 'react';
 import { TbPointFilled } from 'react-icons/tb';
 import user2 from '../images/user2.jpg';
-import { Comment } from '../types/post';
 import { CommentsContext } from './Comments';
 import moment from 'moment';
-import { getComments } from '../actions/getComments';
+import { getComments } from '../actions/comment';
 import { CommentDataTypes } from '../types/comment';
 
 interface Props {
@@ -18,12 +17,10 @@ const CommentList: React.FC<Props> = ({ postId }) => {
     const handleLoadMoreComments = () => {
         getComments(postId, commentsData.next)
         .then((res: any) => {
-            if (res[1]) {
-                //handle errors
-                return
-            }
-
-            setCommentsData((prev: CommentDataTypes) => ({...prev, next: res[0].next, results: [...prev.results, ...res[0].results]}));
+            setCommentsData((prev: CommentDataTypes) => ({...prev, next: res.data.next, results: [...prev.results, ...res.data.results]}));
+        })
+        .catch(er => {
+            //handle errors
         })
     }
 
@@ -31,7 +28,7 @@ const CommentList: React.FC<Props> = ({ postId }) => {
             <>
                 {
                     commentsData.results.length !== 0 ?
-                    commentsData.results.map((comment: Comment, idx) => (
+                    commentsData.results.map((comment: any, idx) => (// any should be Comment
                         <div key={idx} className='my-3 flex gap-2'>
                             <div>
                                 <img
@@ -42,7 +39,7 @@ const CommentList: React.FC<Props> = ({ postId }) => {
                             </div>
                             <div className='max-w-[90%]'>
                                 <div className='bg-gray-100 rounded-xl py-2 px-3 flex flex-col'>
-                                    <span className='text-sm mb-0.5'>{comment.user?.username}</span>
+                                    <span className='text-sm mb-0.5'>{comment.user.username}</span>
                                     <p className='text-xs font-light break-words'>
                                         {comment.content}
                                     </p>

@@ -1,10 +1,9 @@
 import React, { useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { FaUserCircle } from 'react-icons/fa';
-import { createComment } from '../actions/createComment';
+import { createComment } from '../actions/comment';
 import { CommentDataTypes } from '../types/comment';
 import { CommentInputTypes } from '../types/forms';
-import { Comment } from '../types/post';
 import { CommentsContext } from './Comments';
 
 interface Props {
@@ -20,13 +19,11 @@ const CommentForm: React.FC<Props> = ({ postId }) => {
     const onSubmit = (data: any) => {
         createComment({ ...data, postId })
         .then((res: any) => {
-            if (res[1]) {
-                //handle errors
-                return
-            }
-
             reset();
-            setCommentsData((prev: CommentDataTypes) => ({...prev, results: [res[0], ...prev.results]}));
+            setCommentsData((prev: CommentDataTypes) => ({...prev, results: [res.data, ...prev.results]}));
+        })
+        .catch((er) => {
+            //handle error
         })
     };
 

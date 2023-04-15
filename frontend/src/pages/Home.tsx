@@ -1,54 +1,55 @@
 import React, { createContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { getPosts } from '../actions/getPosts';
+import { getPosts } from '../actions/post';
 import PostForm from '../components/PostForm';
 import PostList from '../components/PostList';
-import { Post } from '../types/post';
+import { Post, PostDataTypes } from '../types/post';
 
 interface PostsContextType {
-  posts: Post[],
-  setPosts: (value: Post[] | ((prevVar: Post[]) => Post[])) => void,
-  nextPosts: string | null,
-  setNextPosts: (value: string | null | ((prevVar: string | null) => string | null)) => void,
+  postsData: PostDataTypes,
+  setPostsData: (value: PostDataTypes | ((prevVar: PostDataTypes) => PostDataTypes)) => void,
 }
 
 export const PostsContext = createContext<PostsContextType>({
-  posts: [],
-  setPosts: () => {},
-  nextPosts: null,
-  setNextPosts: () => {}
+  postsData: {
+    count: "0",
+    next: null,
+    previous: null,
+    results: []
+  },
+  setPostsData: () => {},
 })
 
 const Home: React.FC = () => {
-    const [ posts, setPosts ] = useState<Post[]>([]);
-    const [ nextPosts, setNextPosts ] = useState<string | null>(null); 
+    const [ postsData, setPostsData ] = useState<PostDataTypes>({
+      next: null,
+      previous: null,
+      results: [],
+      count: '0'
+    });
 
     const { email } = useSelector((state: any) => state.auth);
 
     useEffect(() => {
       getPosts()
       .then((res: any) => {
-        if (res[1]) {
-          //handle errors
-          return
-        }
-
-        setPosts(res[0].results);
-        setNextPosts(res[0].next);
+        setPostsData(res.data);
+      }).catch((er) => {
+        //handle error
       });
     }, [])
 
     return (
         <div className='min-h-screen bg-gray-100 pt-5'>
           <div className='lg:w-[40%] sm:w-[65%] w-[85%] m-auto'>
-            <PostsContext.Provider value={{ posts, setPosts, nextPosts, setNextPosts }}>
+            <PostsContext.Provider value={{ postsData, setPostsData }}>
               {
                 email ?
                 <PostForm /> :
                 null
               }
               {
-                posts.length !== 0 ?
+                postsData.results.length !== 0 ?
                 <PostList /> :
                 <div className='mt-4 rounded-xl bg-white border py-2 px-5 flex justify-center'>
                   No Posts! Add One.

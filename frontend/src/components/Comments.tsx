@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { getComments } from '../actions/getComments';
+import { getComments } from '../actions/comment';
 import { CommentDataTypes } from '../types/comment';
 import CommentForm from './CommentForm';
 import CommentList from './CommentList';
@@ -37,12 +37,10 @@ const Comments: React.FC<Props> = ({ postId }) => {
     useEffect(() => {
         getComments(postId)
         .then((res: any) => {
-            if (res[1]) {
-                //handle errors
-                return
-            }
-
-            setCommentsData(res[0]);
+            setCommentsData(res.data);
+        })
+        .catch(er => {
+            //handle errors
         });
     }, [postId])
 

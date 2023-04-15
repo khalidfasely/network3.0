@@ -1,19 +1,18 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './routes/App'
-import './index.css'
-import { getUser } from './actions/getUser'
-import { login } from './reducers/auth'
-import { store } from './store/configureStore'
-import { Provider } from 'react-redux'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './routes/App';
+import './index.css';
+import { getUser } from './actions/user';
+import { login } from './reducers/auth';
+import { store } from './store/configureStore';
+import { Provider } from 'react-redux';
 
 getUser()
 .then((res: any) => {
-  if (res[1]) {
-    return
-  }
-
-  store.dispatch(login(res[0]));
+  store.dispatch(login(res.data));
+})
+.catch(er => {
+  //handle errors
 })
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(

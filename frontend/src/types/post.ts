@@ -16,7 +16,8 @@ export interface Comment {
 export interface Image {
     id: number,
     post: number,
-    image: string
+    image: string,
+    isBlob?: boolean
 }
 
 export interface Post {
@@ -25,6 +26,13 @@ export interface Post {
     content: string,
     images: Image[],
     likes: number,
-    comments: Comment[],
+    comments: number,
     date: string
+}
+
+export interface PostDataTypes {
+    count: string,
+    next: string | null,
+    previous: string | null,
+    results: Post[]
 }

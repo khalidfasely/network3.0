@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { registerApi } from '../actions/register';
+import { registerApi } from '../actions/user';
 import { FormErrors, RegisterInputTypes } from '../types/forms';
 
 const initialFormErrors = {
@@ -23,25 +23,21 @@ const Register: React.FC = () => {
 
         registerApi(data)
         .then((res: any) => {
-            if (res[1]) {
-                //handle server errors
-                console.log(res[1])
-                if (res[1].response.data.non_field_errors) {
-                    setError('root', {
-                        type: 'server',
-                        message: res[1].response.data.non_field_errors[0],
-                    })
-                } else {
-                    const entry: any = Object.entries(res[1].response.data)[0];
-                    setError(entry[0], {
-                        type: 'server',
-                        message: entry[1][0]
-                    })
-                }
-                return
-            }
-
             navigate('/login');
+        })
+        .catch(er => {
+            if (er.response.data.non_field_errors) {
+                setError('root', {
+                    type: 'server',
+                    message: er.response.data.non_field_errors[0],
+                })
+            } else {
+                const entry: any = Object.entries(er.response.data)[0];
+                setError(entry[0], {
+                    type: 'server',
+                    message: entry[1][0]
+                })
+            }
         });
     };
 

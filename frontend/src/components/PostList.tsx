@@ -7,31 +7,27 @@ import moment from 'moment';
 import user from '../images/user.jpg';
 import Comments from './Comments';
 import { PostsContext } from '../pages/Home';
-import { getPosts } from '../actions/getPosts';
-import { Image, Post } from '../types/post';
+import { getPosts } from '../actions/post';
+import { PostDataTypes } from '../types/post';
 import PostImages from './PostImages';
 
 const PostList: React.FC = () => {
 
-    const { posts, setPosts, nextPosts, setNextPosts } = useContext(PostsContext);
+    const { postsData, setPostsData } = useContext(PostsContext);
 
     const handleLoadMorePosts = () => {
-        getPosts(nextPosts)
+        getPosts(postsData.next)
         .then((res: any) => {
-            if (res[1]) {
-                //handle errors
-                return
-            }
-
-            setNextPosts(res[0].next);
-            setPosts((prev: Post[]) => [...prev, ...res[0].results])
+            setPostsData((prev: PostDataTypes) => ({...res.data, results: [...prev.results, ...res.data.results]}));
+        }).catch((e)=>{
+            alert("error");
         })
     }
 
     return (
             <>
                 {
-                    posts.map((post, idx) => (
+                    postsData.results.map((post, idx) => (
                         <div key={idx} className='rounded-xl bg-white shadow-md shadow-slate-100 flex p-4 my-2'>
                             <div className='w-14'>{/* rounded-full overflow-hidden */}
                                 <img src={user} alt="user's image" className='rounded-full' />
@@ -66,7 +62,7 @@ const PostList: React.FC = () => {
                                     </div>
                                     <div className='flex items-center gap-1.5'>
                                         <BiComment color='gray' size={18} />
-                                        <span>32</span>
+                                        <span>{post.comments}</span>
                                     </div>
                                     <div className='flex items-center gap-1.5'>
                                         <AiOutlineRetweet color='gray' size={20} />
@@ -85,7 +81,7 @@ const PostList: React.FC = () => {
                     ))
                 }
                 {
-                    nextPosts ?
+                    postsData.next ?
                     <div className='flex justify-center pb-8'>
                         <button
                             onClick={handleLoadMorePosts}

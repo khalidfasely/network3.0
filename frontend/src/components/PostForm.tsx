@@ -4,18 +4,20 @@ import { AiFillPlusCircle } from 'react-icons/ai';
 import Modal from 'react-modal';
 import { useForm } from 'react-hook-form';
 import { PostInputTypes } from '../types/forms';
-import { createPost } from '../actions/createPost';
+import { createPost, uploadImagesApi } from '../actions/post';
 import { PostsContext } from '../pages/Home';
-import { Post } from '../types/post';
+import { PostDataTypes } from '../types/post';
 
 const PostForm: React.FC = () => {
-    const [ images, setImages ] = useState<File[]>();
+    const [ images, setImages ] = useState<any>([]);
+
+    const [ postImagesIDs, setPostImagesIDs ] = useState<number[]>([]);
 
     const { register, handleSubmit, reset, formState: { errors } } = useForm<PostInputTypes>();
 
     const [ newPostModalOpen, setNewpostModalOpen ] = useState<boolean>(false);
 
-    const { setPosts } = useContext(PostsContext);
+    const { setPostsData } = useContext(PostsContext);
 
     const customStyles = {
         content: {
@@ -28,19 +30,39 @@ const PostForm: React.FC = () => {
             transform: 'translate(-50%, -50%)',
             minWidth: '27rem'
         },
-    };
+    }
+
+    const uploadImages = (e: any) => {
+        const formData = new FormData();
+
+        for (let i = 0; i < e.target.files.length; i++) {
+            formData.append('images', e.target.files[i]);
+
+            setImages((prev: any) => [...prev, {image: URL.createObjectURL(e.target.files[i])}])
+        }
+
+        uploadImagesApi(formData)
+        .then((res: any) => {
+            setPostImagesIDs(res.data);
+        })
+        .catch((er: any) => {
+            //handle errors
+        });
+    }
 
     const onSubmit = (data: any) => {
-        createPost(data)
+        createPost({...data, images: postImagesIDs})
         .then((res: any) => {
-            if (res[1]) {
-                //handle errors
-                return
-            }
-
             reset();
-            setPosts((prev: Post[]) => [res[0], ...prev]);
+
+            //setPostsData((prev: PostDataTypes) => ({...prev, results: [res[0], ...prev.results]}))
+            setPostsData((prev: PostDataTypes) => ({...prev, results: [res.data, ...prev.results]}));
+            setImages([]);
+            setNewpostModalOpen(false);
         })
+        .catch((er: any) => {
+            //handle errors
+        });
     };
 
     return (
@@ -68,40 +90,37 @@ const PostForm: React.FC = () => {
                 onRequestClose={() => setNewpostModalOpen(false)}
                 style={customStyles}
             >
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <div className='w-full'>
-                        <input
-                            //onClick={() => setNewpostModalOpen(true)}
+                <form
+                    onSubmit={handleSubmit(onSubmit)}
+                    className='w-[95%] m-auto overflow-hidden'
+                >
+                    <div>
+                        <textarea
                             {...register("content", { required: "This field is required." })}
-                            className='focus:outline-none mx-4 w-full'
+                            className='focus:outline-none mx-4 w-full mt-2'
                             placeholder="What's on your mind."
                         />
                         {errors.content ? <p className='text-red-500 text-sm font-light text-center'>{errors.content.message}</p> : null}
                     </div>
                     <div className='flex flex-col my-1'>
                         <label htmlFor='images' className='block text-sm font-medium text-gray-900 dark:text-white'>Add Images: </label>
-                        {/*<input
-                            //className="block w-full text-sm text-gray-900 border border-gray-300 cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-                            type='file'
-                            id='images'
-                            name='images'
-                            onChange={(e: any) => setImages(e.target.files)}
-                            multiple accept="image/png, image/jpeg"
-                        />*/}
                         <input
-                            {...register("images", { required: "This field is required." })}
                             type='file'
                             id="images"
                             name='images'
-                            onChange={(e: any) => setImages(e.target.files)}
+                            onChange={uploadImages}
                             multiple
                             accept="image/png, image/jpeg"
+                            className='overflow-hidden'
                         />
                         <p className="text-sm text-gray-500 dark:text-gray-300">PNG or JPG</p>
                     </div>
-                    <button>
-                        <AiFillPlusCircle color='#1d4ed8' size={23} />
-                    </button>
+                    <div className='flex justify-end mb-1'>
+                        <button className='flex gap-1 items-center text-[#1d4ed8]'>
+                            Post
+                            <AiFillPlusCircle color='#1d4ed8' size={23} />
+                        </button>
+                    </div>
                 </form>
             </Modal>
         </div>

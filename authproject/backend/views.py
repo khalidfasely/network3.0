@@ -1,15 +1,14 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .serializers import UserProfileSerializer, PostSerializer, CommentSerializer
-
-from .models import Post, PostComment
+from .serializers import UserProfileSerializer, PostSerializer, CommentSerializer, ImageSerializerIDs
+from .models import Post, PostComment, PostImage
 
 from rest_framework import status
 
 from rest_framework.views import APIView
-
 from rest_framework.generics import RetrieveAPIView, ListAPIView, GenericAPIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework.mixins import CreateModelMixin
 
 from rest_framework.pagination import PageNumberPagination
@@ -26,11 +25,6 @@ class GetCurrentUser(RetrieveAPIView):
         serializer = self.get_serializer(user)
         return Response(serializer.data)
 
-class PostList(ListAPIView):
-    queryset = Post.objects.all().order_by('-date')
-    serializer_class = PostSerializer
-    pagination_class = PageNumberPagination
-
 class CommentList(ListAPIView):
     serializer_class = CommentSerializer
     pagination_class = PageNumberPagination
@@ -40,14 +34,36 @@ class CommentList(ListAPIView):
         comments = PostComment.objects.filter(post=post).order_by('-date')
         return comments
 
-class PostItemViewSet(GenericAPIView, CreateModelMixin):
+class UploadImagesViewSet(APIView):
+    def post(self, request):
+        images = request.FILES.getlist('images')
+
+        images_db = []
+
+        for image in images:
+            image_db = PostImage.objects.create(image=image)
+            images_db.append(image_db)
+        
+        serializer = ImageSerializerIDs(images_db, many=True)
+
+        return Response([item['id'] for item in serializer.data], status=status.HTTP_200_OK)
+
+
+class PostItemViewSet(ModelViewSet):
     serializer_class = PostSerializer
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+    queryset = Post.objects.all().order_by('-date')
 
     def perform_create(self, serializer):
-        images = self.request.FILES.getlist('images')
+        images = self.request.data['images']
         serializer.save(user=self.request.user)
+
+        post = Post.objects.get(pk=serializer.data['id'])
+
+        for imageID in images:
+            image = PostImage.objects.get(pk=imageID)
+            image.post = post
+            image.save()
+
 
 class CommentItemViewSet(GenericAPIView, CreateModelMixin):#ViewSet
     serializer_class = CommentSerializer
