@@ -25,9 +25,9 @@ export interface Post {
     user: User,
     content: string,
     images: Image[],
-    likes: number,
+    likes: number[],
     comments: number,
-    date: string
+    date: string,
 }
 
 export interface PostDataTypes {

@@ -10,6 +10,8 @@ class Post(models.Model):
     content = models.TextField(max_length=5000)
     date = models.DateTimeField(auto_now_add=True)
 
+    likes = models.ManyToManyField(CustomUser, blank=True, related_name='likes')
+
     def __str__(self):
         return f"by {self.user.username}"
 

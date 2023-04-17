@@ -57,8 +57,10 @@ const PostList: React.FC = () => {
                                 
                                 <div className='flex justify-between w-[90%] m-auto text-sm text-gray-500 mt-4'>
                                     <div className='flex items-center gap-1.5'>
-                                        <AiOutlineLike color='gray' size={20} />
-                                        <span>25k</span>
+                                        <button> {/* Add Like Functionality */}
+                                            <AiOutlineLike color='gray' size={20} />
+                                        </button>
+                                        <span>{post.likes.length}</span>
                                     </div>
                                     <div className='flex items-center gap-1.5'>
                                         <BiComment color='gray' size={18} />

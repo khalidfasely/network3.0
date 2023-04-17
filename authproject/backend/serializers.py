@@ -4,7 +4,7 @@ from .models import CustomUser, PostImage, Post, PostComment
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('pk', 'email', 'username', 'email_verified')
+        fields = ('pk', 'email', 'username', 'email_verified',)
 
 #https://dev.to/willp11/django-part-3-user-authentication-with-dj-rest-auth-and-allauth-4dih ## Next, we will create a serializer
 
@@ -17,7 +17,7 @@ class CommentSerializer(serializers.Serializer):
 
     class Meta:
         model = PostComment
-        fields = '__all__'
+        fields = ('id', 'post', 'user', 'content', 'date',)
 
     def create(self, validated_data):
         return PostComment.objects.create(**validated_data)
@@ -30,7 +30,7 @@ class CommentSerializer(serializers.Serializer):
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = PostImage
-        fields = '__all__'
+        fields = ('id', 'post', 'image',)
 
 class ImageSerializerIDs(serializers.ModelSerializer):
     class Meta:
@@ -48,7 +48,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = '__all__'
+        fields = ('id', 'user', 'content', 'date', 'images', 'comments', 'likes',)
 
     def get_user(self, obj):
         user = obj.user
@@ -57,13 +57,10 @@ class PostSerializer(serializers.ModelSerializer):
 
     def get_comments(self, obj):
         comments = obj.comments.all()
-        serializer = CommentSerializer(comments, many=True)
+        #serializer = CommentSerializer(comments, many=True)
         return comments.count()
 
     def get_images(self, obj):
         images = obj.images.all()
-        
-        print("jjjjjjjjjjjjjjjjjj")
-        print(PostImage.objects.filter(post_id=obj.id))
         serializer = ImageSerializer(images, many=True)
         return serializer.data
